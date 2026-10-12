@@ -225,11 +225,11 @@ a{color:var(--navy)}
       <div class="pod" role="region" aria-label="Podcast 播放器">
         <div class="pod-top">
           <button class="play" id="pPlay" type="button" aria-label="播放">▶</button>
-          <div style="min-width:0"><div class="label">PODCAST · 約 23 分鐘</div><div class="ttl">發音不重要，能溝通就好？</div></div>
+          <div style="min-width:0"><div class="label">PODCAST · 約 20 分鐘</div><div class="ttl">發音不重要，能溝通就好？</div></div>
         </div>
         <input type="range" id="pSeek" min="0" max="1000" value="0" aria-label="播放進度">
         <div class="pod-ctrl">
-          <span class="time" id="pTime">00:00 / 23:14</span>
+          <span class="time" id="pTime">00:00 / 19:53</span>
           <div class="row"><button class="skip" id="pBack" type="button">−15s</button><button class="skip" id="pFwd" type="button">+15s</button>
           <select id="pRate" aria-label="播放速度"><option value="0.8">0.8×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></div>
         </div>
@@ -573,7 +573,7 @@ a{color:var(--navy)}
 </footer>
 </div>
 
-<audio id="pod" preload="none" src="assets/podcast.mp3"></audio>
+<audio id="pod" preload="none" src="assets/podcast2.mp3"></audio>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -637,9 +637,9 @@ function buildPoll(id,key){
 }
 function renderCmp(){
   var c=$('pollCmp');
-  if(S.pre&&S.post){
-    var d=S.post-S.pre;
-    c.innerHTML='<span>課前 '+S.pre+'</span><span>課後 '+S.post+'</span><span>'+(d<0?'同意度下降 '+(-d)+' 分':d>0?'同意度上升 '+d+' 分':'沒有改變')+'</span>';
+  if(S.pre&&S.pos2t){
+    var d=S.pos2t-S.pre;
+    c.innerHTML='<span>課前 '+S.pre+'</span><span>課後 '+S.pos2t+'</span><span>'+(d<0?'同意度下降 '+(-d)+' 分':d>0?'同意度上升 '+d+' 分':'沒有改變')+'</span>';
   }else c.innerHTML='';
 }
 buildPoll('prePoll','pre');buildPoll('postPoll','post');renderCmp();
@@ -942,7 +942,7 @@ renderEmo();
 });
 $('copySum').addEventListener('click',function(){
   var lines=['〈發音不重要，能溝通就好？〉學習紀錄',
-    '課前同意度：'+(S.pre||'未填')+'　課後同意度：'+(S.post||'未填'),
+    '課前同意度：'+(S.pre||'未填')+'　課後同意度：'+(S.pos2t||'未填'),
     '最小對比聽辨最佳成績：'+(S.game!=null?S.game+' / 8':'未完成'),
     '總複習：'+quizScore()+' / '+quiz.length,
     '1. 我最常出現的數據損毀：'+(S.r1||''),
@@ -1041,19 +1041,19 @@ renderQuiz();
 
 /* ---------- podcast player ---------- */
 var pod=$('pod');
-var DUR=1394;
+var DUR=1193;
 function fmt(t){if(!isFinite(t))t=0;var m=Math.floor(t/60),s=Math.floor(t%60);return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 var restored=false;
 pod.addEventListener('loadedmetadata',function(){
-  if(!restored&&S.pos&&S.pos<pod.duration-5){pod.currentTime=S.pos;}restored=true;upd();
+  if(!restored&&S.pos2&&S.pos2<pod.duration-5){pod.currentTime=S.pos2;}restored=true;upd();
 });
 function dur(){return isFinite(pod.duration)&&pod.duration>0?pod.duration:DUR;}
 function upd(){$('pTime').textContent=fmt(pod.currentTime)+' / '+fmt(dur());$('pSeek').value=Math.round(pod.currentTime/dur()*1000);}
 var lastSave=0;
-pod.addEventListener('timeupdate',function(){upd();var now=Date.now();if(now-lastSave>5000){lastSave=now;S.pos=pod.currentTime;save();}});
+pod.addEventListener('timeupdate',function(){upd();var now=Date.now();if(now-lastSave>5000){lastSave=now;S.pos2=pod.currentTime;save();}});
 pod.addEventListener('play',function(){$('miniPlay').textContent='❚❚';$('pPlay').textContent='❚❚';$('pPlay').setAttribute('aria-label','暫停');if(hasTTS)speechSynthesis.cancel();});
-pod.addEventListener('pause',function(){$('miniPlay').textContent='▶';$('pPlay').textContent='▶';$('pPlay').setAttribute('aria-label','播放');S.pos=pod.currentTime;save();});
-pod.addEventListener('ended',function(){S.pos=0;save();});
+pod.addEventListener('pause',function(){$('miniPlay').textContent='▶';$('pPlay').textContent='▶';$('pPlay').setAttribute('aria-label','播放');S.pos2=pod.currentTime;save();});
+pod.addEventListener('ended',function(){S.pos2=0;save();});
 function togglePod(){if(pod.paused){var p=pod.play();if(p&&p.catch)p.catch(function(){toast('無法播放音檔');});}else pod.pause();}
 $('pPlay').addEventListener('click',togglePod);$('miniPlay').addEventListener('click',togglePod);
 $('pSeek').addEventListener('input',function(){pod.currentTime=$('pSeek').value/1000*dur();});
@@ -1062,7 +1062,7 @@ $('pFwd').addEventListener('click',function(){pod.currentTime=Math.min(dur(),pod
 $('pRate').addEventListener('change',function(){pod.playbackRate=+$('pRate').value;});
 
 renderNav();lips();
-if(S.pos){try{pod.currentTime=S.pos;}catch(e){}}upd();
+if(S.pos2){try{pod.currentTime=S.pos2;}catch(e){}}upd();
 })();
 </script>
 
